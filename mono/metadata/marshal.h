@@ -444,11 +444,14 @@ mono_marshal_get_runtime_invoke_for_sig (MonoMethodSignature *sig);
 MonoMethodSignature*
 mono_marshal_get_string_ctor_signature (MonoMethod *method);
 
+gpointer
+mono_delegate_to_ftnptr_impl_ext (MonoDelegateHandle delegate, gint32 callConv, MonoError *error);
+
 MonoMethod *
 mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle this_loc, MonoError *exernal_error);
 
 MonoMethod *
-mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle this_loc, MonoError *exernal_error, gint32 callConv);
+mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle this_loc, gint32 callConv, MonoError *exernal_error);
 
 gpointer
 mono_marshal_get_vtfixup_ftnptr (MonoImage *image, guint32 token, guint16 type);

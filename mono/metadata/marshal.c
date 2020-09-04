@@ -288,9 +288,16 @@ mono_marshal_unlock_internal (void)
 	mono_marshal_unlock ();
 }
 
+gpointer
+mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, MonoError *error)
+{
+	return mono_delegate_to_ftnptr_impl_ext(delegate, -1, error);
+}
+
+
 // This is a JIT icall, it sets the pending exception (in wrapper) and return NULL on error.
 gpointer
-mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, gint32 callConv, MonoError *error)
+mono_delegate_to_ftnptr_impl_ext (MonoDelegateHandle delegate, gint32 callConv, MonoError *error)
 {
 	gpointer result = NULL;
 	MonoMethod *method, *wrapper;
@@ -334,7 +341,8 @@ mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, gint32 callConv, Mono
 		target_handle = mono_gchandle_new_weakref_from_handle (delegate_target);
 	}
 
-	wrapper = mono_marshal_get_managed_wrapper_2 (method, klass, target_handle, error, callConv);
+	wrapper = mono_marshal_get_managed_wrapper_2 (method, klass, target_handle, callConv, error);
+
 	goto_if_nok (error, leave);
 
 	MONO_HANDLE_SETVAL (delegate, delegate_trampoline, gpointer, mono_compile_method_checked (wrapper, error));
@@ -4010,7 +4018,7 @@ method_signature_is_blittable (MonoMethodSignature *sig)
 MonoMethod *
 mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, MonoError *error)
 {
-	return mono_marshal_get_managed_wrapper_2(method, delegate_klass, target_handle, error, -1);
+	return mono_marshal_get_managed_wrapper_2(method, delegate_klass, target_handle, -1, error);
 }
 
 /**
@@ -4022,7 +4030,7 @@ mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass,
  * UnamangedCallersOnlyAttribute.
  */
 MonoMethod *
-mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, MonoError *error, gint32 callConv)
+mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, gint32 callConv, MonoError *error)
 {
 	MonoMethodSignature *sig, *csig, *invoke_sig;
 	MonoMethodBuilder *mb;
@@ -5942,13 +5950,13 @@ ves_icall_System_Runtime_InteropServices_Marshal_GetDelegateForFunctionPointerIn
 gpointer
 ves_icall_System_Runtime_InteropServices_Marshal_GetFunctionPointerForDelegateInternal (MonoDelegateHandle delegate, MonoError *error)
 {
-	return mono_delegate_to_ftnptr_impl (delegate, -1, error);
+	return mono_delegate_to_ftnptr_impl_ext (delegate, -1, error);
 }
 
 gpointer
 ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2 (MonoDelegateHandle delegate, gint32 callConv, MonoError *error)
 {
-	return mono_delegate_to_ftnptr_impl (delegate, callConv, error);
+	return mono_delegate_to_ftnptr_impl_ext (delegate, callConv, error);
 }
 
 MonoBoolean
