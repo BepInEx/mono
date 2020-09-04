@@ -344,11 +344,6 @@ HANDLES(GCH_2, "InternalFree", ves_icall_System_GCHandle_InternalFree, void, 1, 
 HANDLES(GCH_3, "InternalGet", ves_icall_System_GCHandle_InternalGet, MonoObject, 1, (gpointer))
 HANDLES(GCH_4, "InternalSet", ves_icall_System_GCHandle_InternalSet, void, 2, (gpointer, MonoObject))
 
-
-ICALL_TYPE(MONOEXT, "BepInEx.MonoExtensions", MONOEXT_1)
-HANDLES(MONOEXT_1, "GetFunctionPointerForDelegateInternal2", ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2, gpointer, 2, (MonoDelegate, gint32))
-
-
 ICALL_TYPE(MARSHAL, "System.Runtime.InteropServices.Marshal", MARSHAL_2)
 NOHANDLES(ICALL(MARSHAL_2, "AllocCoTaskMem", ves_icall_System_Runtime_InteropServices_Marshal_AllocCoTaskMem))
 NOHANDLES(ICALL(MARSHAL_3, "AllocHGlobal", ves_icall_System_Runtime_InteropServices_Marshal_AllocHGlobal))

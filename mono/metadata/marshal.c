@@ -4055,13 +4055,10 @@ mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klas
 	 * options.
 	 */
 
-	if (callConv < 0)
-	{
-		cache = get_cache (&mono_method_get_wrapper_cache (method)->managed_wrapper_cache, mono_aligned_addr_hash, NULL);
+	cache = get_cache (&mono_method_get_wrapper_cache (method)->managed_wrapper_cache, mono_aligned_addr_hash, NULL);
 
-		if (!target_handle && (res = mono_marshal_find_in_cache (cache, method)))
-			return res;
-	}
+	if (callConv < 0 && !target_handle && (res = mono_marshal_find_in_cache (cache, method)))
+		return res;
 
 	if (G_UNLIKELY (!delegate_klass)) {
 		/* creating a wrapper for a function pointer with UnmanagedCallersOnlyAttribute */
@@ -4191,7 +4188,7 @@ mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klas
 	}
 
 	if (callConv > -1)
-		csig->call_convention = callConv;
+		csig->call_convention = callConv - 1;
 
 	mono_marshal_emit_managed_wrapper (mb, invoke_sig, mspecs, &m, method, target_handle);
 

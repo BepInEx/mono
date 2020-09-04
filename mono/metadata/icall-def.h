@@ -111,6 +111,11 @@
 #include "icall-def-netcore.h"
 #else
 
+
+
+ICALL_TYPE(MONOEXT, "BepInEx.MonoExtensions", MONOEXT_1)
+HANDLES(MONOEXT_1, "GetFunctionPointerForDelegateInternal2", ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2, gpointer, 2, (MonoDelegate, gint32))
+
 ICALL_TYPE(CLR_INTEROP_SYS, "Interop/Sys", CLR_INTEROP_SYS_1)
 NOHANDLES(ICALL(CLR_INTEROP_SYS_1, "DoubleToString", ves_icall_Interop_Sys_DoubleToString))
 
@@ -747,9 +752,6 @@ NOHANDLES(ICALL(GCH_3, "GetAddrOfPinnedObject", ves_icall_System_GCHandle_GetAdd
 HANDLES(GCH_4, "GetTarget", ves_icall_System_GCHandle_GetTarget, MonoObject, 1, (gpointer))
 HANDLES(GCH_5, "GetTargetHandle", ves_icall_System_GCHandle_GetTargetHandle, gpointer, 3, (MonoObject, gpointer, gint32))
 
-
-ICALL_TYPE(MONOEXT, "BepInEx.MonoExtensions", MONOEXT_1)
-HANDLES(MONOEXT_1, "GetFunctionPointerForDelegateInternal2", ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2, gpointer, 2, (MonoDelegate, gint32))
 
 #if !defined(DISABLE_COM) || defined (HOST_WIN32)
 ICALL_TYPE(MARSHAL, "System.Runtime.InteropServices.Marshal", MARSHAL_1)
