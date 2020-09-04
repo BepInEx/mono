@@ -747,6 +747,10 @@ NOHANDLES(ICALL(GCH_3, "GetAddrOfPinnedObject", ves_icall_System_GCHandle_GetAdd
 HANDLES(GCH_4, "GetTarget", ves_icall_System_GCHandle_GetTarget, MonoObject, 1, (gpointer))
 HANDLES(GCH_5, "GetTargetHandle", ves_icall_System_GCHandle_GetTargetHandle, gpointer, 3, (MonoObject, gpointer, gint32))
 
+
+ICALL_TYPE(MONOEXT, "BepInEx.MonoExtensions", MONOEXT_1)
+HANDLES(MONOEXT_1, "GetFunctionPointerForDelegateInternal2", ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2, gpointer, 2, (MonoDelegate, gint32))
+
 #if !defined(DISABLE_COM) || defined (HOST_WIN32)
 ICALL_TYPE(MARSHAL, "System.Runtime.InteropServices.Marshal", MARSHAL_1)
 NOHANDLES(ICALL(MARSHAL_1, "AddRefInternal", ves_icall_System_Runtime_InteropServices_Marshal_AddRefInternal))

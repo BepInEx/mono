@@ -290,7 +290,7 @@ mono_marshal_unlock_internal (void)
 
 // This is a JIT icall, it sets the pending exception (in wrapper) and return NULL on error.
 gpointer
-mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, MonoError *error)
+mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, MonoError *error, gint32 callConv)
 {
 	gpointer result = NULL;
 	MonoMethod *method, *wrapper;
@@ -334,7 +334,7 @@ mono_delegate_to_ftnptr_impl (MonoDelegateHandle delegate, MonoError *error)
 		target_handle = mono_gchandle_new_weakref_from_handle (delegate_target);
 	}
 
-	wrapper = mono_marshal_get_managed_wrapper (method, klass, target_handle, error);
+	wrapper = mono_marshal_get_managed_wrapper_2 (method, klass, target_handle, error, callConv);
 	goto_if_nok (error, leave);
 
 	MONO_HANDLE_SETVAL (delegate, delegate_trampoline, gpointer, mono_compile_method_checked (wrapper, error));
@@ -4006,6 +4006,13 @@ method_signature_is_blittable (MonoMethodSignature *sig)
 	return TRUE;
 }
 
+
+MonoMethod *
+mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, MonoError *error)
+{
+	return mono_marshal_get_managed_wrapper_2(method, delegate_klass, target_handle, error, -1);
+}
+
 /**
  * mono_marshal_get_managed_wrapper:
  * Generates IL code to call managed methods from unmanaged code 
@@ -4015,7 +4022,7 @@ method_signature_is_blittable (MonoMethodSignature *sig)
  * UnamangedCallersOnlyAttribute.
  */
 MonoMethod *
-mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, MonoError *error)
+mono_marshal_get_managed_wrapper_2 (MonoMethod *method, MonoClass *delegate_klass, MonoGCHandle target_handle, MonoError *error, gint32 callConv)
 {
 	MonoMethodSignature *sig, *csig, *invoke_sig;
 	MonoMethodBuilder *mb;
@@ -4039,10 +4046,14 @@ mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass,
 	 * could be called with different delegates, thus different marshalling
 	 * options.
 	 */
-	cache = get_cache (&mono_method_get_wrapper_cache (method)->managed_wrapper_cache, mono_aligned_addr_hash, NULL);
 
-	if (!target_handle && (res = mono_marshal_find_in_cache (cache, method)))
-		return res;
+	if (callConv < 0)
+	{
+		cache = get_cache (&mono_method_get_wrapper_cache (method)->managed_wrapper_cache, mono_aligned_addr_hash, NULL);
+
+		if (!target_handle && (res = mono_marshal_find_in_cache (cache, method)))
+			return res;
+	}
 
 	if (G_UNLIKELY (!delegate_klass)) {
 		/* creating a wrapper for a function pointer with UnmanagedCallersOnlyAttribute */
@@ -4136,6 +4147,10 @@ mono_marshal_get_managed_wrapper (MonoMethod *method, MonoClass *delegate_klass,
 
 			/* typed args */
 			call_conv = *(gint32*)typed_args [0];
+
+			if (callConv > -1)
+				call_conv = callConv;
+
 			/* named args */
 			for (i = 0; i < num_named_args; ++i) {
 				CattrNamedArg *narg = &arginfo [i];
@@ -5927,7 +5942,13 @@ ves_icall_System_Runtime_InteropServices_Marshal_GetDelegateForFunctionPointerIn
 gpointer
 ves_icall_System_Runtime_InteropServices_Marshal_GetFunctionPointerForDelegateInternal (MonoDelegateHandle delegate, MonoError *error)
 {
-	return mono_delegate_to_ftnptr_impl (delegate, error);
+	return mono_delegate_to_ftnptr_impl (delegate, error, -1);
+}
+
+gpointer
+ves_icall_BepInEx_MonoExtensions_GetFunctionPointerForDelegateInternal2 (MonoDelegateHandle delegate, MonoError *error, gint32 callConv)
+{
+	return mono_delegate_to_ftnptr_impl (delegate, error, callConv);
 }
 
 MonoBoolean
